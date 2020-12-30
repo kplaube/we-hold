@@ -47,9 +47,12 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
     for website in WEBSITES:
         url, css_selector, out_of_stock_price_text = website
 
-        browser.visit(url)
-        price_text = browser.find_by_css(css_selector).text
-        
+        try:
+            browser.visit(url)
+            price_text = browser.find_by_css(css_selector).text
+        except Exception as e:
+            price_text= f"FAILED with {e}"
+
         log_check_event(url, price_text)
         if price_text.lower() != out_of_stock_price_text.lower():
             return url
@@ -88,7 +91,7 @@ if __name__ == "__main__":
 
     headless = os.environ.get('HEADLESS')
     while True:
-        with Browser("chrome", headless= headless=="True") as browser:
+        with Browser("chrome", headless= headless=="True", incognito=True) as browser:
             url = in_stock_xbox_finder(browser)
         if url:
             print(f"RUN FORREST: {url}")
