@@ -52,6 +52,8 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
             price_text = browser.find_by_css(css_selector).text
         except Exception as e:
             price_text= f"FAILED with {e}"
+            log_check_event(url, price_text)
+            continue
 
         log_check_event(url, price_text)
         if price_text.lower() != out_of_stock_price_text.lower():
