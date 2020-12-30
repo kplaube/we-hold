@@ -5,6 +5,7 @@ import requests
 import os
 import datetime
 import urllib.parse
+import time
 
 WEBSITES = [
     (
@@ -63,7 +64,9 @@ def send_found_email(xbox_url):
     url = os.environ.get('MAILGUN_URL')
     api_key = os.environ.get('MAILGUN_API_KEY')
     if (url or api_key) == None: #return error unless url or api_key
-        return "ERROR No mailgun info"
+        error_message = "ERROR No mailgun info"
+        print(error_message)
+        return error_message
 
     recipients = os.environ.get('EMAILS').split(',')
     domain = os.environ.get('MAILGUN_DOMAIN')
@@ -80,14 +83,21 @@ def send_found_email(xbox_url):
 
 if __name__ == "__main__":
     load_dotenv()
+    loop = os.environ.get('LOOP')
     send_found_email("STARTING SERVICE TESTING EMAIL")
 
     headless = os.environ.get('HEADLESS')
+    while True:
+        with Browser("chrome", headless= headless=="True") as browser:
+            url = in_stock_xbox_finder(browser)
+        if url:
+            print(f"RUN FORREST: {url}")
+            send_found_email(url)
+        else:
+            print("Hoooold!")
 
-    with Browser("chrome", headless= headless=="True") as browser:
-        url = in_stock_xbox_finder(browser)
-    if url:
-        print(f"RUN FORREST: {url}")
-        send_found_email(url)
-    else:
-        print("Hoooold!")
+        if loop:
+            print("...for one minute!")
+            time.sleep(60) # 1 minute
+        else:
+            break
