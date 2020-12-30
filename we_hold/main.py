@@ -44,7 +44,7 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
         browser.visit(url)
         price_text = browser.find_by_css(css_selector).text
 
-        if price_text != out_of_stock_price_text:
+        if price_text.lower() != out_of_stock_price_text.lower():
             return url
 
     return None
