@@ -3,6 +3,8 @@ from typing import Optional
 from dotenv import load_dotenv
 import requests
 import os
+import datetime
+import urllib.parse
 
 WEBSITES = [
     (
@@ -46,19 +48,25 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
 
         browser.visit(url)
         price_text = browser.find_by_css(css_selector).text
-
+        
+        log_check_event(url, price_text)
         if price_text.lower() != out_of_stock_price_text.lower():
             return url
 
     return None
 
+def log_check_event(url, price_text):
+    parsed_url = urllib.parse.urlparse(url)
+    print(f"{datetime.datetime.now()} checking {parsed_url.netloc} -> {price_text}")
+
 def send_found_email(xbox_url):
     url = os.environ.get('MAILGUN_URL')
-    domain = os.environ.get('MAILGUN_DOMAIN')
     api_key = os.environ.get('MAILGUN_API_KEY')
-    recipients = os.environ.get('EMAILS').split(',')
     if (url or api_key) == None: #return error unless url or api_key
         return "ERROR No mailgun info"
+
+    recipients = os.environ.get('EMAILS').split(',')
+    domain = os.environ.get('MAILGUN_DOMAIN')
 
     from_email = f"We hold xbox monitor <weholdmonitor@sandbox.mgsend.net>"
     return requests.post(
@@ -72,10 +80,11 @@ def send_found_email(xbox_url):
 
 if __name__ == "__main__":
     load_dotenv()
-
     send_found_email("STARTING SERVICE TESTING EMAIL")
 
-    with Browser("chrome") as browser:
+    headless = os.environ.get('HEADLESS')
+
+    with Browser("chrome", headless= headless=="True") as browser:
         url = in_stock_xbox_finder(browser)
     if url:
         print(f"RUN FORREST: {url}")
