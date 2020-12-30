@@ -1,5 +1,8 @@
 from splinter import Browser
 from typing import Optional
+from dotenv import load_dotenv
+import requests
+import os
 
 WEBSITES = [
     (
@@ -49,12 +52,33 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
 
     return None
 
+def send_found_email(xbox_url):
+    url = os.environ.get('MAILGUN_URL')
+    domain = os.environ.get('MAILGUN_DOMAIN')
+    api_key = os.environ.get('MAILGUN_API_KEY')
+    recipients = os.environ.get('EMAILS').split(',')
+    if (url or api_key) == None: #return error unless url or api_key
+        return "ERROR No mailgun info"
+
+    from_email = f"We hold xbox monitor <weholdmonitor@sandbox.mgsend.net>"
+    return requests.post(
+        url,
+        auth=("api", api_key),
+        data={"from": from_email,
+            "to": recipients,
+            "subject": "Available xbox found",
+            "text": f"FOUND IT!! RUN FORREST: {xbox_url}"})
+
 
 if __name__ == "__main__":
+    load_dotenv()
+
+    send_found_email("STARTING SERVICE TESTING EMAIL")
+
     with Browser("chrome") as browser:
         url = in_stock_xbox_finder(browser)
-
     if url:
         print(f"RUN FORREST: {url}")
+        send_found_email(url)
     else:
         print("Hoooold!")
