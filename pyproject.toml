@@ -7,12 +7,15 @@ authors = ["Klaus Laube <kplaube@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 splinter = "^0.14.0"
+requests = "^2.25"
+python-dotenv = "0.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 flake8 = "^3.8.4"
 mypy = "^0.790"
 yapf = "^0.30.0"
+pylint = "^2.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
