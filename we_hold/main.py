@@ -15,6 +15,16 @@ WEBSITES = [
         "Ikke tilgængelig",
     ),
     (
+        "https://www.xbox.com/en-gb/configure/8WJ714N3RBTL?ranMID=24542&ranEAID=kXQk6*ivFEQ&ranSiteID=kXQk6.ivFEQ-1calhptjboV60i5_9LNqOg&epi=kXQk6.ivFEQ-1calhptjboV60i5_9LNqOg&irgwc=1&OCID=AID2000142_aff_7593_1243925&tduid=%28ir__auezd9kuk0kfqkb9kk0sohz3ze2xs9d9kecxn9gf00%29%287593%29%281243925%29%28kXQk6.ivFEQ-1calhptjboV60i5_9LNqOg%29%28%29&irclickid=_auezd9kuk0kfqkb9kk0sohz3ze2xs9d9kecxn9gf00",  # noqa
+        "button[aria-label='Checkout bundle']",
+        "Out of stock",
+    ),
+    (
+        "https://www.power.dk/gaming-og-underholdning/konsol/konsol/xbox-series-x-konsol/p-1119853/",
+        ".buy-area .buy-area__webshop .btn-mega",
+        "Ikke på lager online",
+    ),
+    (
         "https://www.amazon.de/-/en/RRT-00009/dp/B08H93ZRLL/ref=pd_ybh_a_1?_encoding=UTF8&psc=1&refRID=6TQZHKJC7M7MSP434G0P",  # noqa
         ".a-color-price",
         "Currently unavailable.",
@@ -40,7 +50,7 @@ WEBSITES = [
         "Ikke tilgjengelig",
     ),
     ("https://www.box.co.uk/RRT-00007-Xbox-Series-X-Console_3201195.html",
-     ".p-buy", "Request Stock Alert")
+     ".p-buy", "Request Stock Alert"),
 ]
 
 
