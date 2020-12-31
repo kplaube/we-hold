@@ -1,11 +1,12 @@
-from splinter import Browser
-from typing import Optional
-from dotenv import load_dotenv
-import requests
-import os
 import datetime
-import urllib.parse
+import os
 import time
+import urllib.parse
+from typing import List, Optional
+
+import requests
+from dotenv import load_dotenv
+from splinter import Browser
 
 WEBSITES = [
     (
@@ -43,7 +44,9 @@ WEBSITES = [
 ]
 
 
-def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
+def in_stock_xbox_finder(browser: Browser) -> List[str]:
+    urls = []
+
     for website in WEBSITES:
         url, css_selector, out_of_stock_price_text = website
 
@@ -51,39 +54,44 @@ def in_stock_xbox_finder(browser: Browser) -> Optional[str]:
             browser.visit(url)
             price_text = browser.find_by_css(css_selector).text
         except Exception as e:
-            price_text= f"FAILED with {e}"
+            price_text = f"FAILED with {e}"
             log_check_event(url, price_text)
             continue
 
         log_check_event(url, price_text)
         if price_text.lower() != out_of_stock_price_text.lower():
-            return url
+            urls.append(url)
 
-    return None
+    return urls
 
-def log_check_event(url, price_text):
+
+def log_check_event(url: str, price_text: str) -> None:
     parsed_url = urllib.parse.urlparse(url)
-    print(f"{datetime.datetime.now()} checking {parsed_url.netloc} -> {price_text}")
+    print(
+        f"{datetime.datetime.now()} checking {parsed_url.netloc} -> {price_text}"
+    )
 
-def send_found_email(xbox_url):
+
+def send_found_email(xbox_url: str) -> Optional[requests.models.Response]:
     url = os.environ.get('MAILGUN_URL')
     api_key = os.environ.get('MAILGUN_API_KEY')
-    if (url or api_key) == None: #return error unless url or api_key
+    if (url or api_key) is None:
         error_message = "ERROR No mailgun info"
         print(error_message)
-        return error_message
+        return None
 
-    recipients = os.environ.get('EMAILS').split(',')
+    recipients = os.environ.get('EMAILS', '').split(',')
     domain = os.environ.get('MAILGUN_DOMAIN')
 
-    from_email = f"We hold xbox monitor <weholdmonitor@sandbox.mgsend.net>"
-    return requests.post(
-        url,
-        auth=("api", api_key),
-        data={"from": from_email,
-            "to": recipients,
-            "subject": "Available xbox found",
-            "text": f"FOUND IT!! RUN FORREST: {xbox_url}"})
+    from_email = "We hold xbox monitor <weholdmonitor@sandbox.mgsend.net>"
+    return requests.post(url,
+                         auth=("api", api_key),
+                         data={
+                             "from": from_email,
+                             "to": recipients,
+                             "subject": "Available xbox found",
+                             "text": f"FOUND IT!! RUN FORREST: {xbox_url}"
+                         })
 
 
 if __name__ == "__main__":
@@ -93,16 +101,19 @@ if __name__ == "__main__":
 
     headless = os.environ.get('HEADLESS')
     while True:
-        with Browser("chrome", headless= headless=="True", incognito=True) as browser:
-            url = in_stock_xbox_finder(browser)
-        if url:
+        with Browser("chrome", headless=headless == "True",
+                     incognito=True) as browser:
+            urls = in_stock_xbox_finder(browser)
+
+        for url in urls:
             print(f"RUN FORREST: {url}")
             send_found_email(url)
-        else:
+
+        if not urls:
             print("Hoooold!")
 
         if loop:
             print("...for one minute!")
-            time.sleep(60) # 1 minute
+            time.sleep(60)  # 1 minute
         else:
             break
